@@ -1,13 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -25,14 +15,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var path = require("path");
-    var fs = require("fs");
-    var marked = require("marked");
-    var components_1 = require("typedoc/dist/lib/converter/components");
-    var converter_1 = require("typedoc/dist/lib/converter/converter");
-    var CommentPlugin_1 = require("typedoc/dist/lib/converter/plugins/CommentPlugin");
-    var comments_1 = require("typedoc/dist/lib/models/comments");
-    var options_1 = require("typedoc/dist/lib/utils/options");
+    const path = require("path");
+    const fs = require("fs");
+    const marked = require("marked");
+    const components_1 = require("typedoc/dist/lib/converter/components");
+    const converter_1 = require("typedoc/dist/lib/converter/converter");
+    const CommentPlugin_1 = require("typedoc/dist/lib/converter/plugins/CommentPlugin");
+    const comments_1 = require("typedoc/dist/lib/models/comments");
+    const options_1 = require("typedoc/dist/lib/utils/options");
     // tslint:disable-next-line ban-types
     // ReflectionKind["Package"] = 1337;
     // declare module "typedoc/dist/lib/models/reflections/abstract" {
@@ -61,27 +51,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
      *
      *
      */
-    var ExternalModuleMapPlugin = /** @class */ (function (_super) {
-        __extends(ExternalModuleMapPlugin, _super);
-        function ExternalModuleMapPlugin() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        ExternalModuleMapPlugin.prototype.initialize = function () {
+    let ExternalModuleMapPlugin = class ExternalModuleMapPlugin extends components_1.ConverterComponent {
+        initialize() {
             this.modules = new Set();
             this.options = this.application.options;
-            this.listenTo(this.owner, (_a = {},
-                _a[converter_1.Converter.EVENT_BEGIN] = this.onBegin,
-                _a[converter_1.Converter.EVENT_CREATE_DECLARATION] = this.onDeclarationBegin,
-                _a[converter_1.Converter.EVENT_RESOLVE_BEGIN] = this.onBeginResolve,
-                _a));
-            var _a;
-        };
+            this.listenTo(this.owner, {
+                [converter_1.Converter.EVENT_BEGIN]: this.onBegin,
+                [converter_1.Converter.EVENT_CREATE_DECLARATION]: this.onDeclarationBegin,
+                [converter_1.Converter.EVENT_RESOLVE_BEGIN]: this.onBeginResolve,
+            });
+        }
         /**
          * Triggered when the converter begins converting a project.
          *
          * @param context  The context object describing the current state the converter is in.
          */
-        ExternalModuleMapPlugin.prototype.onBegin = function (context) {
+        onBegin(context) {
             this.moduleRenames = [];
             this.options.read({}, options_1.OptionsReadMode.Prefetch);
             this.externalmap = (this.options.getValue('external-modulemap'));
@@ -96,12 +81,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     console.log("WARN: external map not recognized. Not processing.", e);
                 }
             }
-        };
-        ExternalModuleMapPlugin.prototype.onDeclarationBegin = function (context, reflection, node) {
+        }
+        onDeclarationBegin(context, reflection, node) {
             if (!node || !this.isMappingEnabled)
                 return;
             var fileName = node.fileName;
-            var match = this.mapRegEx.exec(fileName);
+            let match = this.mapRegEx.exec(fileName);
             /*
         
             */
@@ -113,20 +98,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     reflection: reflection
                 });
             }
-        };
+        }
         /**
          * Triggered when the converter begins resolving a project.
          *
          * @param context  The context object describing the current state the converter is in.
          */
-        ExternalModuleMapPlugin.prototype.onBeginResolve = function (context) {
-            var projRefs = context.project.reflections;
-            var refsArray = Object.keys(projRefs).reduce(function (m, k) { m.push(projRefs[k]); return m; }, []);
+        onBeginResolve(context) {
+            let projRefs = context.project.reflections;
+            let refsArray = Object.keys(projRefs).reduce((m, k) => { m.push(projRefs[k]); return m; }, []);
             // Process each rename
-            this.moduleRenames.forEach(function (item) {
-                var renaming = item.reflection;
+            this.moduleRenames.forEach(item => {
+                let renaming = item.reflection;
                 // Find an existing module that already has the "rename to" name.  Use it as the merge target.
-                var mergeTarget = refsArray.filter(function (ref) { return ref.kind === renaming.kind && ref.name === item.renameTo; })[0];
+                let mergeTarget = refsArray.filter(ref => ref.kind === renaming.kind && ref.name === item.renameTo)[0];
                 // If there wasn't a merge target, just change the name of the current module and exit.
                 if (!mergeTarget) {
                     renaming.name = item.renameTo;
@@ -136,8 +121,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     mergeTarget.children = [];
                 }
                 // Since there is a merge target, relocate all the renaming module's children to the mergeTarget.
-                var childrenOfRenamed = refsArray.filter(function (ref) { return ref.parent === renaming; });
-                childrenOfRenamed.forEach(function (ref) {
+                let childrenOfRenamed = refsArray.filter(ref => ref.parent === renaming);
+                childrenOfRenamed.forEach((ref) => {
                     // update links in both directions
                     //console.log(' merging ', mergeTarget, ref);
                     ref.parent = mergeTarget;
@@ -149,27 +134,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
                     renaming.children.length = 0;
                 CommentPlugin_1.CommentPlugin.removeReflection(context.project, renaming);
             });
-            this.modules.forEach(function (name) {
-                var ref = refsArray.filter(function (ref) { return ref.name === name; })[0];
-                var root = ref.originalName.replace(new RegExp(name + ".*", 'gi'), name);
+            this.modules.forEach((name) => {
+                let ref = refsArray.filter(ref => ref.name === name)[0];
+                let root = ref.originalName.replace(new RegExp(`${name}.*`, 'gi'), name);
                 try {
                     // tslint:disable-next-line ban-types
                     Object.defineProperty(ref, "kindString", {
-                        get: function () { return "Package"; },
-                        set: function (newValue) { return "Package"; },
+                        get() { return "Package"; },
+                        set(newValue) { return "Package"; },
                     });
-                    var readme = fs.readFileSync(path.join(root, 'README.md'));
+                    let readme = fs.readFileSync(path.join(root, 'README.md'));
                     ref.comment = new comments_1.Comment("", marked(readme.toString()));
                 }
                 catch (e) {
-                    console.error("No README found for module \"" + name + "\"");
+                    console.error(`No README found for module "${name}"`);
                 }
             });
-        };
-        ExternalModuleMapPlugin = __decorate([
-            components_1.Component({ name: 'external-module-map' })
-        ], ExternalModuleMapPlugin);
-        return ExternalModuleMapPlugin;
-    }(components_1.ConverterComponent));
+        }
+    };
+    ExternalModuleMapPlugin = __decorate([
+        components_1.Component({ name: 'external-module-map' })
+    ], ExternalModuleMapPlugin);
     exports.ExternalModuleMapPlugin = ExternalModuleMapPlugin;
 });
