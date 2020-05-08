@@ -1,3 +1,8 @@
+> ### ❗ DEPRECATED ❗
+> ### Please use [@strictsoftware/typedoc-plugin-monorepo](https://www.npmjs.com/package/@strictsoftware/typedoc-plugin-monorepo) instead.
+
+---
+
 ## typedoc-plugin-monorepo
 
 ### What
